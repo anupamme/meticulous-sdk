@@ -46,7 +46,8 @@
   },
   "pnpm": {
     "overrides": {
-      "json5": "^2.2.2"
+      "json5": "^2.2.2",
+      "basic-ftp": "6.2.1"
     }
   },
   "version": "0.0.0",
