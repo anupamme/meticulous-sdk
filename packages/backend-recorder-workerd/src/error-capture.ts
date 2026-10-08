@@ -66,10 +66,19 @@ export const deserializeCapturedError = (
     return new Error(unparseableMessage);
   }
   const { message, name, ...fields } = parsed;
-  const error = Object.assign(
-    new Error(typeof message === "string" ? message : fallbackMessage),
-    fields,
-  );
+  const error = new Error(typeof message === "string" ? message : fallbackMessage);
+  // Copy each own property individually, rather than via `Object.assign`, so a captured
+  // error can't repoint the prototype chain or clobber built-ins (e.g. `__proto__`).
+  for (const [key, value] of Object.entries(fields)) {
+    if (key !== "__proto__" && key !== "constructor" && key !== "prototype") {
+      Object.defineProperty(error, key, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+  }
   if (typeof name === "string") {
     error.name = name;
   }
