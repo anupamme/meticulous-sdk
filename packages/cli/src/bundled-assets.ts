@@ -11,14 +11,15 @@ import { join } from "path";
  */
 const IS_BUNDLED = process.env.METICULOUS_CLI_BUNDLED === "true";
 
-const bundledAssetDir = (name: string): string | undefined =>
-  IS_BUNDLED ? join(__dirname, name) : undefined;
+// Each asset path below is a hardcoded literal (never a caller-supplied
+// value), so these cannot be used for path traversal.
+export const debugWorkspaceTemplatesDir = IS_BUNDLED
+  ? join(__dirname, "debug-workspace-templates")
+  : undefined;
 
-export const debugWorkspaceTemplatesDir = bundledAssetDir(
-  "debug-workspace-templates",
-);
-
-export const replayDebuggerUiDir = bundledAssetDir("replay-debugger-ui-out");
+export const replayDebuggerUiDir = IS_BUNDLED
+  ? join(__dirname, "replay-debugger-ui-out")
+  : undefined;
 
 /**
  * The CLI's own onboard templates. This module sits at the root of both src/
