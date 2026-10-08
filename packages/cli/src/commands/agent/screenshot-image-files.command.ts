@@ -1,5 +1,5 @@
 import { mkdir, readdir, stat, unlink } from "fs/promises";
-import { join } from "path";
+import { basename, join } from "path";
 import {
   createClientWithOAuth,
   getScreenshotUrls,
@@ -38,7 +38,9 @@ const cleanupOldImages = async (dir: string): Promise<void> => {
   const cutoff = Date.now() - MAX_AGE_MS;
   await Promise.all(
     entries.map(async (entry) => {
-      const entryPath = join(dir, entry);
+      // Strip any directory components from `entry` (e.g. a `../` segment
+      // or an absolute path) before joining, so cleanup can't escape `dir`.
+      const entryPath = join(dir, basename(entry));
       try {
         const stats = await stat(entryPath);
         if (stats.isFile() && stats.mtimeMs < cutoff) {
@@ -56,7 +58,7 @@ const downloadImage = async (
   fileName: string,
   url: string,
 ): Promise<string> => {
-  const filePath = join(dir, fileName);
+  const filePath = joinWithinDir(dir, fileName);
   await downloadFile(url, filePath);
   return filePath;
 };
